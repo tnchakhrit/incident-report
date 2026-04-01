@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เอกสารรายงานอุบัติการณ์ (Incident & Near Miss Report)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:#1a3a5c;--primary-light:#e8f0f8;--accent:#e63946;
+    --success:#2d6a4f;--success-light:#d8f3dc;--warning:#e76f00;--warning-light:#fff3e0;
+    --purple:#6b35b0;--purple-light:#f3eeff;
+    --border:#dde3ea;--text-muted:#6c757d;--card-shadow:0 2px 12px rgba(26,58,92,0.08);
+  }
+  *{box-sizing:border-box}
+  body{font-family:'Sarabun',sans-serif;background:#f0f4f8;color:#1a2332;font-size:15px;line-height:1.6}
+  .company-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0d2137 0%,#1a3a5c 60%,#1e4976 100%);padding:24px}
+  .company-screen-inner{max-width:480px;width:100%;text-align:center}
+  .company-screen h1{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px}
+  .company-screen p{color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:36px}
+  .company-btn{width:100%;padding:22px 20px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:14px;display:flex;align-items:center;gap:16px;text-align:left;backdrop-filter:blur(6px)}
+  .company-btn:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);transform:translateY(-2px)}
+  .company-btn .co-logo{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0}
+  .company-btn.pmm .co-logo{background:#e63946;color:#fff}
+  .company-btn.crd .co-logo{background:#2d6a4f;color:#fff}
+  .company-btn .co-info{flex:1}
+  .company-btn .co-name{font-size:18px;font-weight:700;margin-bottom:2px}
+  .company-btn .co-desc{font-size:12px;opacity:0.6}
+  .company-btn .co-arrow{font-size:20px;opacity:0.4}
+  .form-header{background:linear-gradient(135deg,#1a3a5c 0%,#0d2137 100%);color:#fff;padding:28px 0 24px;border-bottom:3px solid var(--accent)}
+  .form-header h1{font-size:20px;font-weight:700;margin:0 0 4px}
+  .form-header p{font-size:13px;opacity:0.7;margin:0}
+  .company-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px 4px 6px;font-size:13px;color:#fff;margin-bottom:12px;cursor:pointer}
+  .company-badge .badge-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+  .company-badge.pmm .badge-dot{background:#e63946}
+  .company-badge.crd .badge-dot{background:#2d6a4f}
+  .progress-bar-custom{background:rgba(255,255,255,0.15);border-radius:20px;height:5px;margin-top:20px}
+  .progress-fill{background:var(--accent);height:100%;border-radius:20px;transition:width 0.4s ease}
+  .section-card{background:#fff;border-radius:14px;box-shadow:var(--card-shadow);margin-bottom:20px;overflow:hidden}
+  .section-header{padding:14px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+  .section-header.blue{background:var(--primary-light)}
+  .section-header.red{background:#fdf0f0}
+  .section-header.green{background:var(--success-light)}
+  .section-header.orange{background:var(--warning-light)}
+  .section-header.purple{background:var(--purple-light)}
+  .section-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  .section-icon.blue{background:var(--primary)}
+  .section-icon.red{background:var(--accent)}
+  .section-icon.green{background:var(--success)}
+  .section-icon.orange{background:var(--warning)}
+  .section-icon.purple{background:var(--purple)}
+  .section-title{font-size:15px;font-weight:700;margin:0;color:var(--primary)}
+  .section-subtitle{font-size:12px;color:var(--text-muted);margin:0}
+  .section-body{padding:20px 22px}
+  .form-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
+  .required-star{color:var(--accent)}
+  .form-control,.form-select{border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:14px;transition:border-color 0.2s,box-shadow 0.2s;background:#fafbfc}
+  .form-control:focus,.form-select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,58,92,0.1);background:#fff;outline:none}
+  .form-control[readonly]{background:#f1f5f9;color:var(--text-muted);cursor:not-allowed}
+  textarea.form-control{resize:vertical;min-height:90px}
+  .report-no-field{position:relative}
+  .qshe-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#e63946;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+  .check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+  .check-item{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.15s;background:#fafbfc}
+  .check-item:hover{border-color:var(--primary);background:var(--primary-light)}
+  .check-item input{margin-top:3px;flex-shrink:0;accent-color:var(--primary);width:15px;height:15px}
+  .check-item.checked{border-color:var(--primary);background:var(--primary-light)}
+  .check-item label{font-size:13px;cursor:pointer;margin:0;line-height:1.4;color:#374151}
+  .check-item label strong{display:block;font-size:13px;color:#1a2332}
+  .check-item label small{font-size:12px;color:var(--text-muted)}
+  .severity-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .severity-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;background:#fafbfc;text-align:center}
+  .severity-item input{accent-color:var(--primary);width:16px;height:16px}
+  .severity-item label{font-size:13px;font-weight:600;cursor:pointer;margin:0}
+  .severity-item .sev-icon{font-size:22px}
+  .severity-item.low.checked{border-color:#2d6a4f;background:#d8f3dc}
+  .severity-item.medium.checked{border-color:#e76f00;background:#fff3e0}
+  .severity-item.high.checked{border-color:#e63946;background:#fdf0f0}
+  .severity-item.critical.checked{border-color:#7b0000;background:#ffe0e0}
+  .sub-section{border-top:1px dashed var(--border);margin-top:20px;padding-top:18px}
+  .sub-section-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+  .sub-section-title::before{content:'';display:block;width:3px;height:16px;background:var(--primary);border-radius:2px}
+  .rca-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .rca-card{border:1.5px solid var(--border);border-radius:10px;padding:14px;background:#fafbfc;transition:border-color 0.2s}
+  .rca-card:focus-within{border-color:var(--primary);background:#fff}
+  .rca-label{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .rca-tag{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:var(--primary);color:#fff;font-size:11px;font-weight:800;flex-shrink:0}
+  .rca-card textarea{border:none;background:transparent;width:100%;font-family:'Sarabun',sans-serif;font-size:13px;outline:none;resize:none;min-height:70px;color:#374151}
+  .action-table-wrap{overflow-x:auto}
+  .action-table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
+  .action-table th{background:var(--primary-light);padding:10px 12px;border:1px solid var(--border);font-weight:700;text-align:left;color:var(--primary)}
+  .action-table td{padding:6px 8px;border:1px solid var(--border);vertical-align:middle}
+  .action-table td input,.action-table td textarea{border:none;background:transparent;width:100%;font-family:'Sarabun',sans-serif;font-size:13px;outline:none;padding:4px;resize:none}
+  .action-table td input:focus,.action-table td textarea:focus{background:var(--primary-light);border-radius:4px}
+  .action-table .row-num{width:36px;text-align:center;color:var(--text-muted);font-weight:600}
+  .btn-add-row{background:var(--primary-light);color:var(--primary);border:1.5px dashed var(--primary);border-radius:8px;padding:8px 18px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s}
+  .btn-add-row:hover{background:var(--primary);color:#fff}
+  .btn-del-row{background:none;border:none;color:#e63946;cursor:pointer;font-size:16px;padding:2px 6px}
+  .approval-flow{display:flex;flex-direction:column;gap:12px}
+  .approval-step{display:flex;align-items:flex-start;gap:14px;padding:16px;border:1.5px solid var(--border);border-radius:10px;background:#fafbfc}
+  .approval-num{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;margin-top:2px}
+  .approval-step-info{flex:1}
+  .approval-step-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:4px}
+  .approval-step-sub{font-size:12px;color:var(--text-muted);margin-bottom:10px}
+  .approval-status{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#fff3e0;color:#e76f00;white-space:nowrap;margin-top:4px}
+  .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fafbfc}
+  .upload-zone:hover{border-color:var(--primary);background:var(--primary-light)}
+  .upload-zone .upload-icon{font-size:36px;margin-bottom:10px}
+  .upload-zone p{margin:0;font-size:14px;color:var(--text-muted)}
+  .upload-zone strong{color:var(--primary)}
+  .photo-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:14px}
+  .photo-thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:var(--border)}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover}
+  .photo-thumb .remove-btn{position:absolute;top:4px;right:4px;background:rgba(230,57,70,0.9);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .submit-area{background:#fff;border-radius:14px;box-shadow:var(--card-shadow);padding:22px;display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+  .btn-draft{background:#f1f5f9;color:#374151;border:1.5px solid var(--border);border-radius:10px;padding:11px 22px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s}
+  .btn-draft:hover{background:var(--border)}
+  .btn-submit{background:var(--primary);color:#fff;border:none;border-radius:10px;padding:11px 28px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px}
+  .btn-submit:hover{background:#0d2137;transform:translateY(-1px)}
+  .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+  .status-draft{background:#f1f5f9;color:#64748b}
+  .status-sent{background:var(--warning-light);color:var(--warning)}
+  .toast-container{position:fixed;bottom:24px;right:24px;z-index:9999}
+  .toast-msg{background:var(--primary);color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.2);display:flex;align-items:center;gap:10px;animation:slideIn 0.3s ease;margin-top:10px}
+  .toast-msg.success{background:var(--success)}
+  .toast-msg.error{background:var(--accent)}
+  @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+  .hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+  @media(max-width:576px){
+    .check-grid{grid-template-columns:1fr}
+    .severity-grid{grid-template-columns:repeat(2,1fr)}
+    .rca-grid{grid-template-columns:1fr}
+    .submit-area{flex-direction:column}
+    .btn-draft,.btn-submit{width:100%;justify-content:center}
+    .approval-step{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<!-- COMPANY SELECTOR -->
+<div id="companyScreen" class="company-screen">
+  <div class="company-screen-inner">
+    <div style="font-size:44px;margin-bottom:16px">🔴</div>
+    <h1>เอกสารรายงานอุบัติการณ์</h1>
+    <p>Incident & Near Miss Report — กรุณาเลือกบริษัท</p>
+    <button class="company-btn pmm" onclick="selectCompany('PMM')">
+      <div class="co-logo">PM</div>
+      <div class="co-info"><div class="co-name">PMM</div><div class="co-desc">บันทึกเหตุการณ์สำหรับบริษัท PMM</div></div>
+      <div class="co-arrow">›</div>
+    </button>
+    <button class="company-btn crd" onclick="selectCompany('CRD')">
+      <div class="co-logo">CR</div>
+      <div class="co-info"><div class="co-name">CRD</div><div class="co-desc">บันทึกเหตุการณ์สำหรับบริษัท CRD</div></div>
+      <div class="co-arrow">›</div>
+    </button>
+    <p style="color:rgba(255,255,255,0.25);font-size:11px;margin-top:32px;letter-spacing:0.5px">Design by Chakhrit</p>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<div id="formWrapper" style="display:none">
+
+<div class="form-header">
+  <div class="container">
+    <div id="companyBadge" class="company-badge" onclick="changeCompany()" title="เปลี่ยนบริษัท">
+      <div class="badge-dot" id="badgeDot"></div>
+      <span id="badgeLabel"></span>
+      <span style="opacity:0.5;font-size:11px;margin-left:4px">เปลี่ยน</span>
+    </div>
+    <h1>🔴 เอกสารรายงานอุบัติการณ์ (Incident &amp; Near Miss Report)</h1>
+    <p>Engineering Incident Reporting System</p>
+    <div class="progress-bar-custom"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="container py-4">
+<form id="mainForm" novalidate>
+
+  <!-- ส่วนที่ 1 -->
+  <div class="section-card">
+    <div class="section-header blue">
+      <div class="section-icon blue">📋</div>
+      <div>
+        <p class="section-title">ส่วนที่ 1 — ข้อมูลเบื้องต้น (General Information)</p>
+        <p class="section-subtitle">กรอกทันทีที่พบเหตุการณ์</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label">หมายเลขเอกสาร (Report No.)</label>
+          <div class="report-no-field">
+            <input type="text" class="form-control" name="reportNo" readonly placeholder="สงวนไว้สำหรับ QSHE">
+            <span class="qshe-badge">QSHE</span>
+          </div>
+          <p class="hint">⚠️ ผู้กรอกไม่ต้องระบุ — QSHE จะออกเลขให้</p>
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label">ชื่อโครงการ (Project Name) <span class="required-star">*</span></label>
+          <select class="form-select" name="project" id="projectSelect" required onchange="handleProjectChange(this)">
+            <option value="">-- เลือกโครงการ --</option>
+            <optgroup id="projectOptions" label="โครงการทั้งหมด"></optgroup>
+          </select>
+          <div id="projectOtherBox" class="mt-2" style="display:none">
+            <input type="text" class="form-control" name="projectOther" placeholder="ระบุชื่อโครงการ...">
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">วันที่เกิดเหตุ (Date of Incident) <span class="required-star">*</span></label>
+          <input type="date" class="form-control" name="incidentDate" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">เวลาที่เกิดเหตุ (Time of Incident)</label>
+          <input type="time" class="form-control" name="incidentTime">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">วันที่รายงาน (Date of Report)</label>
+          <input type="date" class="form-control" name="reportDate" id="reportDate">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">ผู้รายงาน — ชื่อ-นามสกุล (Reported By) <span class="required-star">*</span></label>
+          <input type="text" class="form-control" name="reporterName" placeholder="ชื่อ-นามสกุล" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">ตำแหน่ง (Position)</label>
+          <input type="text" class="form-control" name="reporterPosition" placeholder="เช่น หัวหน้าช่างอาคาร, วิศวกรอาคาร">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">สถานที่เกิดเหตุแบบเจาะจง (Specific Location) <span class="required-star">*</span></label>
+          <input type="text" class="form-control" name="specificLocation" required
+            placeholder="เช่น ห้องเครื่อง MDB ชั้น B1 / โถงลิฟต์ชั้น 5 อาคาร A / ลานจอดรถชั้น B2 / สระว่ายน้ำ">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 2 -->
+  <div class="section-card">
+    <div class="section-header orange">
+      <div class="section-icon orange">⚠️</div>
+      <div>
+        <p class="section-title">ส่วนที่ 2 — ประเภทของเหตุการณ์ (Incident Category)</p>
+        <p class="section-subtitle">เลือกได้มากกว่า 1 ข้อ</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="check-grid">
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Near Miss">
+          <label><strong>Near Miss</strong><small>เหตุการณ์เกือบเกิดอุบัติเหตุ ไม่มีผู้บาดเจ็บหรือทรัพย์สินเสียหาย</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Accident / Injury">
+          <label><strong>Accident / Injury</strong><small>อุบัติเหตุ / มีผู้ได้รับบาดเจ็บ</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Property / Equipment Damage">
+          <label><strong>Property / Equipment Damage</strong><small>ทรัพย์สินส่วนกลาง หรืออุปกรณ์เครื่องจักรเสียหาย</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="System Failure / Breakdown">
+          <label><strong>System Failure / Breakdown</strong><small>ระบบวิศวกรรมหลักขัดข้อง เช่น ไฟดับ, ลิฟต์ค้าง, ปั๊มน้ำเสีย</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Fire / Explosion">
+          <label><strong>Fire / Explosion</strong><small>เหตุเพลิงไหม้ / ประกายไฟ / ระเบิด</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Security / Breach">
+          <label><strong>Security / Breach</strong><small>เหตุรักษาความปลอดภัย / บุกรุก / โจรกรรม</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Environmental / Chemical">
+          <label><strong>Environmental / Chemical</strong><small>สารเคมีรั่วไหล / น้ำเสียล้น / มลพิษ</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Tenant / Co-owner Complaint-related">
+          <label><strong>Tenant / Co-owner Complaint-related</strong><small>เหตุที่ส่งผลกระทบต่อเนื่องถึงข้อร้องเรียนรุนแรง</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Fatality / Death">
+          <label><strong>Fatality / Death</strong><small>เสียชีวิต / มีผู้เสียชีวิตภายในพื้นที่โครงการ</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Natural Disaster">
+          <label><strong>Natural Disaster</strong><small>ภัยธรรมชาติ เช่น น้ำท่วม พายุ แผ่นดินไหว</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Water Damage / Leak">
+          <label><strong>Water Damage / Leak</strong><small>น้ำท่วม / น้ำรั่วซึมภายในอาคาร</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" id="otherCategoryItem">
+          <input type="checkbox" name="incidentCategory" value="Other" id="otherCategoryCheck">
+          <label><strong>อื่นๆ (Other)</strong><small>ระบุประเภทเหตุการณ์เพิ่มเติม</small></label>
+        </div>
+        <div id="otherCategoryInput" style="display:none;grid-column:1/-1;padding:4px 2px">
+          <input type="text" name="incidentCategoryOther" class="form-control" placeholder="ระบุประเภทเหตุการณ์อื่นๆ..." style="font-family:inherit;font-size:14px">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 3 -->
+  <div class="section-card">
+    <div class="section-header red">
+      <div class="section-icon red">📝</div>
+      <div>
+        <p class="section-title">ส่วนที่ 3 — รายละเอียดของเหตุการณ์ (Incident Description)</p>
+        <p class="section-subtitle">อธิบายให้ครบถ้วน ก่อน-ระหว่าง-หลังเกิดเหตุ</p>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="mb-3">
+        <label class="form-label">ลำดับเหตุการณ์ (Chronology of Events) <span class="required-star">*</span></label>
+        <textarea class="form-control" name="chronology" rows="5" required
+          placeholder="อธิบายว่าเกิดอะไรขึ้น ก่อน-ระหว่าง-หลังเกิดเหตุ อย่างละเอียด&#10;เช่น เวลา 09.30 น. ช่างอาคารพบว่า... / เวลา 09.45 น. ได้รับการแจ้ง... / เวลา 10.00 น. ดำเนินการ..."></textarea>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-section-title">ผู้เกี่ยวข้อง / ผู้ได้รับบาดเจ็บ (Involved Persons / Casualties)</div>
+        <textarea class="form-control" name="involvedPersons" rows="3"
+          placeholder="ระบุชื่อ-นามสกุล และสถานะ เช่น&#10;- นายสมชาย ใจดี (ช่างอาคาร) — ได้รับบาดเจ็บที่มือขวา&#10;- นางสาวสมหญิง รักดี (ลูกบ้าน ห้อง 12B) — พยาน&#10;- บริษัท ABC (ผู้รับเหมา Outsource งาน M&amp;E)"></textarea>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-section-title">ความเสียหายที่เกิดขึ้น (Extent of Damage)</div>
+        <textarea class="form-control" name="damageExtent" rows="3"
+          placeholder="เช่น อาการบาดเจ็บ, เครื่องจักรที่พัง, ขอบเขตน้ำท่วมขัง, พื้นที่ที่ได้รับผลกระทบ, ประมาณการเสียหายเบื้องต้น"></textarea>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-section-title">ภาพถ่ายประกอบ (Attachments / Photos)</div>
+        <div class="upload-zone" id="uploadZone" onclick="openUploadWidget()">
+          <div class="upload-icon">📷</div>
+          <p><strong>กดเพื่ออัปโหลดรูปภาพ</strong> หรือลากรูปมาวางที่นี่</p>
+          <p class="mt-1" style="font-size:12px">จุดเกิดเหตุ / สภาพความเสียหาย / อุปกรณ์ที่เกี่ยวข้อง — JPG, PNG, HEIC สูงสุด 10MB/รูป</p>
+        </div>
+        <div class="photo-preview-grid" id="photoGrid"></div>
+        <input type="hidden" name="photoUrls" id="photoUrls">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 4 -->
+  <div class="section-card">
+    <div class="section-header orange">
+      <div class="section-icon orange">🚨</div>
+      <div>
+        <p class="section-title">ส่วนที่ 4 — การดำเนินการแก้ไขเบื้องต้น (Immediate Actions Taken)</p>
+        <p class="section-subtitle">สิ่งที่ทำทันทีหลังเกิดเหตุ</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="mb-3">
+        <label class="form-label">การระงับเหตุ (Emergency Response)</label>
+        <textarea class="form-control" name="emergencyResponse" rows="3"
+          placeholder="เช่น ทำการตัดไฟทันที (LOTO), ใช้ถังดับเพลิงฉีดระงับเหตุ, ปฐมพยาบาลเบื้องต้น, นำส่งโรงพยาบาล"></textarea>
+      </div>
+      <div class="sub-section">
+        <div class="sub-section-title">การจัดการพื้นที่ (Site Control)</div>
+        <textarea class="form-control" name="siteControl" rows="3"
+          placeholder="เช่น กั้นพื้นที่เขตอันตรายด้วยกรวยจราจร, ติดป้ายเตือนชำรุด, ปิดประตูห้องเครื่อง, ระบายน้ำออกจากพื้นที่"></textarea>
+      </div>
+      <div class="sub-section">
+        <div class="sub-section-title">การแจ้งเตือน (Notification)</div>
+        <textarea class="form-control" name="notification" rows="3"
+          placeholder="ได้แจ้งหน่วยงานภายนอกหรือไม่? เช่น&#10;- เรียกรถพยาบาล (EMS) เวลา 10.15 น.&#10;- แจ้งตำรวจ สน. ... เวลา ...&#10;- แจ้งการไฟฟ้านครหลวง เวลา ...&#10;- ไม่ได้แจ้งหน่วยงานภายนอก"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 5 -->
+  <div class="section-card">
+    <div class="section-header purple">
+      <div class="section-icon purple">🔍</div>
+      <div>
+        <p class="section-title">ส่วนที่ 5 — การวิเคราะห์สาเหตุที่แท้จริง (Root Cause Analysis)</p>
+        <p class="section-subtitle">วิเคราะห์ตามหลัก 4M — ระบุเฉพาะส่วนที่เกี่ยวข้อง</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="rca-grid mb-4">
+        <div class="rca-card">
+          <div class="rca-label"><span class="rca-tag">M1</span> Man — คน / บุคลากร</div>
+          <textarea name="rcaMan" placeholder="เช่น ขาดความรู้ความชำนาญ, ประมาทเลินเล่อ, ฝ่าฝืนกฎระเบียบ, เหนื่อยล้า, ไม่สวม PPE"></textarea>
+        </div>
+        <div class="rca-card">
+          <div class="rca-label"><span class="rca-tag">M2</span> Machine — เครื่องจักร / อุปกรณ์</div>
+          <textarea name="rcaMachine" placeholder="เช่น อุปกรณ์ชำรุด, เสื่อมสภาพตามอายุ, ไม่ได้รับการบำรุงรักษา PM, เครื่องมือไม่เหมาะสมกับงาน"></textarea>
+        </div>
+        <div class="rca-card">
+          <div class="rca-label"><span class="rca-tag">M3</span> Method — ขั้นตอน / วิธีการทำงาน</div>
+          <textarea name="rcaMethod" placeholder="เช่น ไม่มีคู่มือ SOP, ขั้นตอนไม่รัดกุม, ขาดการสื่อสารระหว่างทีม, ไม่มี Work Permit"></textarea>
+        </div>
+        <div class="rca-card">
+          <div class="rca-label"><span class="rca-tag">M4</span> Material — วัสดุ / สภาพแวดล้อม</div>
+          <textarea name="rcaMaterial" placeholder="เช่น พื้นเปียกลื่น, แสงสว่างไม่เพียงพอ, อากาศถ่ายเทไม่ดี, วัสดุชำรุดหรือไม่ได้มาตรฐาน"></textarea>
+        </div>
+      </div>
+      <label class="form-label">สรุปสาเหตุหลักที่ทำให้เกิดเหตุ (Primary Root Cause) <span class="required-star">*</span></label>
+      <textarea class="form-control" name="primaryRootCause" rows="3" required
+        placeholder="สรุปสาเหตุที่แท้จริงหลักของเหตุการณ์นี้คืออะไร..."></textarea>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 6 -->
+  <div class="section-card">
+    <div class="section-header green">
+      <div class="section-icon green">✅</div>
+      <div>
+        <p class="section-title">ส่วนที่ 6 — มาตรการป้องกันและแนวทางแก้ไขระยะยาว (Preventive &amp; Corrective Actions)</p>
+        <p class="section-subtitle">สิ่งที่ต้องทำเพื่อไม่ให้เกิดซ้ำ</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="action-table-wrap">
+        <table class="action-table" id="actionTable">
+          <thead>
+            <tr>
+              <th class="row-num">#</th>
+              <th style="min-width:300px">สิ่งที่ต้องทำ (Action Item)<br><small style="font-weight:400;color:var(--text-muted)">เช่น จัดอบรมการใช้บันไดทรงเอ / เปลี่ยนวาล์วน้ำ / เพิ่มจุดตรวจ PM</small></th>
+              <th style="min-width:140px">ผู้รับผิดชอบ (PIC)</th>
+              <th style="min-width:130px">กำหนดเสร็จ (Target Date)</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="actionBody">
+            <tr>
+              <td class="row-num">1</td>
+              <td><textarea name="actionItem[]" rows="2" placeholder="ระบุสิ่งที่ต้องทำ..."></textarea></td>
+              <td><input type="text" name="actionPIC[]" placeholder="ชื่อผู้รับผิดชอบ"></td>
+              <td><input type="date" name="actionDate[]"></td>
+              <td><button type="button" class="btn-del-row" onclick="delRow(this)">🗑</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn-add-row" onclick="addActionRow()">＋ เพิ่มแถว</button>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 7 -->
+  <div class="section-card">
+    <div class="section-header red">
+      <div class="section-icon red">📊</div>
+      <div>
+        <p class="section-title">ส่วนที่ 7 — การประเมินผลกระทบและความเสี่ยง (Impact &amp; Risk Assessment)</p>
+        <p class="section-subtitle">ประเมิน ณ วันที่รายงาน</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="mb-4">
+        <label class="form-label">ระดับความรุนแรง (Severity Level) <span class="required-star">*</span></label>
+        <div class="severity-grid">
+          <div class="severity-item low" onclick="toggleSeverity(this)">
+            <input type="radio" name="severityLevel" value="ต่ำ (Low)" required>
+            <div class="sev-icon">🟢</div>
+            <label>ต่ำ<br><small style="font-weight:400;font-size:11px">Low</small></label>
+          </div>
+          <div class="severity-item medium" onclick="toggleSeverity(this)">
+            <input type="radio" name="severityLevel" value="ปานกลาง (Medium)">
+            <div class="sev-icon">🟡</div>
+            <label>ปานกลาง<br><small style="font-weight:400;font-size:11px">Medium</small></label>
+          </div>
+          <div class="severity-item high" onclick="toggleSeverity(this)">
+            <input type="radio" name="severityLevel" value="สูง (High)">
+            <div class="sev-icon">🟠</div>
+            <label>สูง<br><small style="font-weight:400;font-size:11px">High</small></label>
+          </div>
+          <div class="severity-item critical" onclick="toggleSeverity(this)">
+            <input type="radio" name="severityLevel" value="วิกฤต (Critical)">
+            <div class="sev-icon">🔴</div>
+            <label>วิกฤต<br><small style="font-weight:400;font-size:11px">Critical</small></label>
+          </div>
+        </div>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label class="form-label">ประมาณการมูลค่าความเสียหาย (Estimated Cost of Damage)</label>
+          <div class="input-group">
+            <input type="number" class="form-control" name="estimatedCost" placeholder="0">
+            <span class="input-group-text" style="font-family:'Sarabun',sans-serif;background:#f1f5f9;border-color:var(--border)">บาท</span>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <label class="form-label">ผลกระทบต่อการทำงาน / การอยู่อาศัย (Downtime / Operation Impact)</label>
+          <input type="text" class="form-control" name="operationImpact"
+            placeholder="เช่น ต้องตัดไฟโซนล็อบบี้ 2 ชั่วโมง / ลิฟต์โดยสารงดให้บริการ 1 วัน">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 8 -->
+  <div class="section-card">
+    <div class="section-header green">
+      <div class="section-icon green">✍️</div>
+      <div>
+        <p class="section-title">ส่วนที่ 8 — ข้อมูลผู้จัดทำรายงาน (Prepared By)</p>
+        <p class="section-subtitle">หัวหน้าช่างอาคารประจำโครงการ</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label class="form-label">ชื่อ-นามสกุล (Full Name) <span class="required-star">*</span></label>
+          <input type="text" class="form-control" name="preparedByName" placeholder="ชื่อ-นามสกุล" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">ตำแหน่ง (Position)</label>
+          <input type="text" class="form-control" name="preparedByPosition" placeholder="เช่น หัวหน้าช่างอาคาร">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">วันที่จัดทำรายงาน</label>
+          <input type="date" class="form-control" name="preparedDate" id="preparedDate">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 9 -->
+  <div class="section-card">
+    <div class="section-header blue">
+      <div class="section-icon blue">📨</div>
+      <div>
+        <p class="section-title">ส่วนที่ 9 — การทบทวนและลงนาม (Review &amp; Approval)</p>
+        <p class="section-subtitle">ระบบจะส่ง Email แจ้งผู้ตรวจสอบและผู้อนุมัติอัตโนมัติ</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="approval-flow">
+
+        <div class="approval-step">
+          <div class="approval-num">1</div>
+          <div class="approval-step-info">
+            <div class="approval-step-title">ผู้ตรวจสอบ (Reviewed By)</div>
+            <div class="approval-step-sub">ผู้จัดการอาคาร / ผู้จัดการนิติบุคคลฯ — Auto-fill จากโครงการที่เลือก</div>
+            <div class="row g-2">
+              <div class="col-md-6"><input type="text" class="form-control" name="reviewedByName" placeholder="เลือกโครงการเพื่อ auto-fill"></div>
+              <div class="col-md-6"><input type="email" class="form-control" name="reviewedByEmail" placeholder="อีเมลสำหรับแจ้งเตือน"></div>
+            </div>
+            <p class="hint" style="margin-top:6px">ข้อมูลจะถูกกรอกอัตโนมัติเมื่อเลือกโครงการ — แก้ไขได้ถ้าจำเป็น</p>
+          </div>
+          <span class="approval-status">⏳ รอตรวจสอบ</span>
+        </div>
+
+        <div class="approval-step">
+          <div class="approval-num">2</div>
+          <div class="approval-step-info">
+            <div class="approval-step-title">ผู้อนุมัติ / รับทราบ (Approved / Acknowledged By)</div>
+            <div class="approval-step-sub">คณะกรรมการความปลอดภัย / ส่วนงานบริหารวิศวกรรมส่วนกลาง (QSHE)</div>
+            <div class="row g-2">
+              <div class="col-md-6"><input type="text" class="form-control" name="approvedByName" value="ศศิธร สุขสมบูรณ์" style="background:#e8f0f8" readonly></div>
+              <div class="col-md-6"><input type="email" class="form-control" name="approvedByEmail" value="sasiton.s@primo.co.th" style="background:#e8f0f8" readonly></div>
+            </div>
+          </div>
+          <span class="approval-status">⏳ รออนุมัติ</span>
+        </div>
+
+      </div>
+      <div style="margin-top:14px;padding:12px 16px;background:#f0f4f8;border-radius:8px;font-size:12px;color:var(--text-muted)">
+        💡 เมื่อกด "ส่งรายงาน" ระบบจะส่ง Email แจ้งผู้ตรวจสอบและผู้อนุมัติพร้อมรายละเอียดเหตุการณ์อัตโนมัติ
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <span class="status-badge status-draft" id="statusBadge">● แบบร่าง</span>
+    <button type="button" class="btn-draft" onclick="saveDraft()">💾 บันทึกแบบร่าง</button>
+    <button type="submit" class="btn-submit"><span>📤</span> ส่งรายงาน</button>
+  </div>
+
+  <p style="text-align:center;color:var(--text-muted);font-size:11px;margin:12px 0 4px;letter-spacing:0.5px">Design by Chakhrit</p>
+
+</form>
+</div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+<script>
+const CLOUDINARY_CLOUD_NAME='dr7r7lsre';
+const CLOUDINARY_UPLOAD_PRESET='incident_report';
+const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxI49KE7Iy9B0uq5aHNdqtB1RIl9gXUS8l2bt087RalFWyfWS4sNzW0RsqvoLNZsB5Z/exec';
+
+const PROJECTS={
+  PMM:['เคนซิงตัน ระยอง 1','เคนซิงตัน ระยอง 2','เคนซิงตัน แหลมฉบัง 1','เคนซิงตัน แหลมฉบัง 2','เดอะ คาบาน่า','เดอะ พาร์คแลนด์ เพชรเกษม-ท่าพระ','เดอะ รูม พระราม 4','ดิ ออริจิ้น แพรกษา','ดิ ออริจิ้น พหลโยธิน 57','ดิ ออริจิ้น ลาดพร้าว 15','ดิ ออริจิ้น ลาดพร้าว-บางกะปิ','ดิ ออริจิ้น สุขุมวิท 105','ดิ ออริจิ้น อี22 สเตชั่น','ดิ แอดเดรส พญาไท','ดีบูรา พรานนก','ทรอปิคาน่า','ไนท์บริดจ์ เดอะ โอเชี่ยน ศรีราชา','น็อตติ้ง ฮิลล์ ระยอง','น็อตติ้ง ฮิลล์ แหลมฉบัง-ศรีราชา','บรอมตัน 107B','บริกซ์ตัน 107A','บริกซ์ตัน ระยอง','บริกซ์ตัน เกษตร ศรีราชา แคมปัส','บริกซ์ตัน เพ็ท 107C','บริกซ์ตัน เพ็ท แอนด์ เพลย์ พหลโยธิน 50 สเตชั่น','บริกซ์ตัน แคมปัส บางแสน','พอส ไอดี','ออริจิ้น พลัก แอนด์ เพลย์ นนทบุรี','ออริจิ้น พลัก แอนด์ เพลย์ รามคำแหง 103 ทริปเปิ้ล สเตชั่น','ออริจิ้น พลัก แอนด์ เพลย์ รามอินทรา','ออริจิ้น พลัก แอนด์ เพลย์ ศรีนครินทร์','ออริจิ้น พลัก แอนด์ เพลย์ สิรินธร','ออริจิ้น พลัก แอนด์ เพลย์ อี22 สเตชั่น','ออริจิ้น เพลย์ บางขุนนนท์ ทริปเปิ้ล สเตชั่น','ออริจิ้น เพลย์ บางแสน','ออริจิ้น เพลย์ ศรีอุดม สเตชั่น','ออริจิ้น แคมปัส ขอนแก่น','ออริจิ้น เพลส ขอนแก่น'],
+  CRD:['โซ ออริจิ้น พหลโยธิน 69 สเตชั่น','โซ ออริจิ้น เกษตร อินเตอร์เชนจ์','ดิ ออริจิ้น กะทู้-ป่าตอง','ไนท์บริดจ์ สุขุมวิท เทพารักษ์','ไนท์บริดจ์ สเปซ พระราม 4','ไนท์บริดจ์ เกษตร โซไซตี้','ไนท์บริดจ์ ไพรม์ รัชโยธิน','ไนท์บริดจ์ ไพรม์ สาทร','โนเบิล โซโล ทองหล่อ','พาร์ค 24 นิติบุคคล 1','พาร์ค 24 นิติบุคคล 2','พาร์ค ออริจิ้น จุฬา-สามย่าน','พาร์ค ออริจิ้น ทองหล่อ','พาร์ค ออริจิ้น พญาไท','พาร์ค ออริจิ้น ราชเทวี','ออริจิ้น เพลส บางนา','แฮมป์ตัน ระยอง','แฮมป์ตัน ศรีราชา']
+};
+
+// Building Manager map: project → {name, email}
+const BM_MAP={
+  'เคนซิงตัน ระยอง 1':{name:'ภาสินี รัตนสมสุขกุล',email:'phasinee.r@primo.co.th'},
+  'เคนซิงตัน ระยอง 2':{name:'ปรียาภรณ์ ประมงค์',email:'preeyaporn.p@primo.co.th'},
+  'เคนซิงตัน แหลมฉบัง 1':{name:'วรรธกาล ลันสูงเนิน',email:'wantakan.l@primo.co.th'},
+  'เคนซิงตัน แหลมฉบัง 2':{name:'พสิษฐ์ หล่อจิรพันธุ์',email:'pasit.l@primo.co.th'},
+  'โซ ออริจิ้น พหลโยธิน 69 สเตชั่น':{name:'นิลเนตร เหมือดขุนทศ',email:'ninnate.m@primo.co.th'},
+  'โซ ออริจิ้น เกษตร อินเตอร์เชนจ์':{name:'นันท์นภัส ราชวิชา',email:'nanapat.r@primo.co.th'},
+  'เดอะ คาบาน่า':{name:'สุกัญญา สุทธิพิเชฏฐ์',email:'sukanya.su@primo.co.th'},
+  'เดอะ พาร์คแลนด์ เพชรเกษม-ท่าพระ':{name:'ชุติมา สิงห์พล',email:'chutima.si@primo.co.th'},
+  'เดอะ รูม พระราม 4':{name:'โชคพล รุ่งเรืองอุไร',email:'chokpol.r@primo.co.th'},
+  'ดิ ออริจิ้น กะทู้-ป่าตอง':{name:'พรรณวดี มณีรัตน์',email:'panwadee.m@primo.co.th'},
+  'ดิ ออริจิ้น แพรกษา':{name:'เทิดพงษ์ เลิศสูงเนิน',email:'terdpong.l@primo.co.th'},
+  'ดิ ออริจิ้น พหลโยธิน 57':{name:'สุดารัตน์ โสแสนชัย',email:'sudarat.s@primo.co.th'},
+  'ดิ ออริจิ้น ลาดพร้าว 15':{name:'ลาวัลย์ บุญชัย',email:'lawan.b@primo.co.th'},
+  'ดิ ออริจิ้น ลาดพร้าว-บางกะปิ':{name:'จุฑารัตน์ ลีฬหวนิช',email:'jutarat.l@primo.co.th'},
+  'ดิ ออริจิ้น สุขุมวิท 105':{name:'ลานนา สบายใจ',email:'lanna.s@primo.co.th'},
+  'ดิ ออริจิ้น อี22 สเตชั่น':{name:'ไพรินทร์ เกตุมี',email:'pairin.k@primo.co.th'},
+  'ดิ แอดเดรส พญาไท':{name:'นภสร สายแจ่ม',email:'napasorn.s@primo.co.th'},
+  'ดีบูรา พรานนก':{name:'กัลยา กันหาสุข',email:'kanlaya.k@primo.co.th'},
+  'ทรอปิคาน่า':{name:'เอกภณ รัศมีธัญ',email:'eakaphon.r@primo.co.th'},
+  'ไนท์บริดจ์ สุขุมวิท เทพารักษ์':{name:'พัชฎาพร ก้อมณี',email:'patchadaporn.k@primo.co.th'},
+  'ไนท์บริดจ์ สเปซ พระราม 4':{name:'พรรณวดี มณีรัตน์',email:'panwadee.m@primo.co.th'},
+  'ไนท์บริดจ์ เกษตร โซไซตี้':{name:'นิติยา ผกาแดง',email:'nitiya.p@primo.co.th'},
+  'ไนท์บริดจ์ เดอะ โอเชี่ยน ศรีราชา':{name:'ณัชปพิพัฒน์ สะสีแสง',email:'natchapapipat.s@primo.co.th'},
+  'ไนท์บริดจ์ ไพรม์ รัชโยธิน':{name:'กัญญารัตน์ ภาคโพธิ',email:'kanyarath.p@primo.co.th'},
+  'ไนท์บริดจ์ ไพรม์ สาทร':{name:'เบญสุกาญน์ ประทีปโชติ',email:'bensukan.p@primo.co.th'},
+  'โนเบิล โซโล ทองหล่อ':{name:'ทัศนันท์ กิ่งพุธ',email:'thassanan.k@primo.co.th'},
+  'น็อตติ้ง ฮิลล์ ระยอง':{name:'ดุสิต เจเถื่อน',email:'dusit.j@primo.co.th'},
+  'น็อตติ้ง ฮิลล์ แหลมฉบัง-ศรีราชา':{name:'ภัทรชา คงชนะ',email:'patharacha.k@primo.co.th'},
+  'บรอมตัน 107B':{name:'สุกัญญา สุทธิพิเชฏฐ์',email:'sukanya.su@primo.co.th'},
+  'บริกซ์ตัน 107A':{name:'สุกัญญา สุทธิพิเชฏฐ์',email:'sukanya.su@primo.co.th'},
+  'บริกซ์ตัน ระยอง':{name:'พรชนัน ศรีสอาด',email:'pornchanan.s@primo.co.th'},
+  'บริกซ์ตัน เกษตร ศรีราชา แคมปัส':{name:'กิ่งนภา ธรรมศิริ',email:'kingnapha.t@primo.co.th'},
+  'บริกซ์ตัน เพ็ท 107C':{name:'สุกัญญา สุทธิพิเชฏฐ์',email:'sukanya.su@primo.co.th'},
+  'บริกซ์ตัน เพ็ท แอนด์ เพลย์ พหลโยธิน 50 สเตชั่น':{name:'สหทรรศน์ สัมมาวิทย์',email:'sahatad.s@primo.co.th'},
+  'บริกซ์ตัน แคมปัส บางแสน':{name:'สายฝน บุญวัฒน์',email:'saifon.bo@primo.co.th'},
+  'พอส ไอดี':{name:'นิโลบล ชนะชื่น',email:'nilobon.ch@primo.co.th'},
+  'พาร์ค 24 นิติบุคคล 1':{name:'เสกสรร สันติปรีชาจิตต์',email:'seksan.s@primo.co.th'},
+  'พาร์ค 24 นิติบุคคล 2':{name:'สุวภัทร เปี่ยมทองคำ',email:'suwaphat.pi@primo.co.th'},
+  'พาร์ค ออริจิ้น จุฬา-สามย่าน':{name:'พัชรินทร์ รัตนขจรไชย',email:'phatcharin.r@primo.co.th'},
+  'พาร์ค ออริจิ้น ทองหล่อ':{name:'อภิสรา โชคลาภ',email:'aphisara.c@primo.co.th'},
+  'พาร์ค ออริจิ้น พญาไท':{name:'ศนิวาร วัฒนานนท์',email:'saniwan.w@primo.co.th'},
+  'พาร์ค ออริจิ้น ราชเทวี':{name:'ศุภาวดี นิยมไทย',email:'suphavadee.n@primo.co.th'},
+  'ออริจิ้น พลัก แอนด์ เพลย์ นนทบุรี':{name:'คฑายุทธ์ วิบูลย์ธนภัณฑ์',email:'khathayut.w@primo.co.th'},
+  'ออริจิ้น พลัก แอนด์ เพลย์ รามคำแหง 103 ทริปเปิ้ล สเตชั่น':{name:'จิตราภรณ์ ปันบู้',email:'chittraphon.p@primo.co.th'},
+  'ออริจิ้น พลัก แอนด์ เพลย์ รามอินทรา':{name:'กัณฑิชา กำเนิดขอนแก่น',email:'kanticha.k@primo.co.th'},
+  'ออริจิ้น พลัก แอนด์ เพลย์ ศรีนครินทร์':{name:'สุกันยา พุกท่าไม้',email:'sukanya.p@primo.co.th'},
+  'ออริจิ้น พลัก แอนด์ เพลย์ สิรินธร':{name:'นิภาพร เพียรเกิด',email:'niphaporn.p@primo.co.th'},
+  'ออริจิ้น พลัก แอนด์ เพลย์ อี22 สเตชั่น':{name:'จิตอารีย์ พูลเรือง',email:'jiarlee.p@primo.co.th'},
+  'ออริจิ้น เพลย์ บางขุนนนท์ ทริปเปิ้ล สเตชั่น':{name:'คฑายุทธ์ วิบูลย์ธนภัณฑ์',email:'khathayut.w@primo.co.th'},
+  'ออริจิ้น เพลย์ บางแสน':{name:'ชนัฐดา แก้วกระจ่าง',email:'chanatda.k@primo.co.th'},
+  'ออริจิ้น เพลย์ ศรีอุดม สเตชั่น':{name:'วิภาคย์ ทองอร่าม',email:'wipak.t@primo.co.th'},
+  'ออริจิ้น เพลส บางนา':{name:'พรรณวดี มณีรัตน์',email:'panwadee.m@primo.co.th'},
+  'ออริจิ้น แคมปัส ขอนแก่น':{name:'ชัยมณี อ่อนสุระทุม',email:'chaimanee.o@primo.co.th'},
+  'ออริจิ้น เพลส ขอนแก่น':{name:'พรรณวดี มณีรัตน์',email:'panwadee.m@primo.co.th'},
+  'แฮมป์ตัน ระยอง':{name:'สุจิตตรา กำลังฤทธิ์',email:'sujittra.ka@primo.co.th'},
+  'แฮมป์ตัน ศรีราชา':{name:'ชินวุธ เอี่ยมรักษา',email:'chinnawut.a@primo.co.th'},
+};
+
+let uploadedPhotos=[],cloudinaryWidget,selectedCompany='',actionRowCount=1;
+
+function selectCompany(company){
+  selectedCompany=company;
+  sessionStorage.setItem('selectedCompany',company);
+  const badge=document.getElementById('companyBadge');
+  badge.className='company-badge '+company.toLowerCase();
+  document.getElementById('badgeDot').textContent=company==='PMM'?'PM':'CR';
+  document.getElementById('badgeLabel').textContent=company;
+  populateProjects(company);
+  document.getElementById('companyScreen').style.display='none';
+  document.getElementById('formWrapper').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function populateProjects(company){
+  const og=document.getElementById('projectOptions');
+  const sel=document.getElementById('projectSelect');
+  og.innerHTML='';sel.value='';
+  (PROJECTS[company]||[]).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;og.appendChild(o);});
+  const oth=document.createElement('option');oth.value='__other__';oth.textContent='อื่นๆ (ระบุเอง)';og.appendChild(oth);
+}
+
+function handleProjectChange(sel){
+  document.getElementById('projectOtherBox').style.display=sel.value==='__other__'?'block':'none';
+  // Auto-fill Reviewer จาก BM_MAP
+  const bm=BM_MAP[sel.value];
+  const rName=document.querySelector('[name="reviewedByName"]');
+  const rEmail=document.querySelector('[name="reviewedByEmail"]');
+  if(rName&&rEmail){
+    if(bm){
+      rName.value=bm.name;
+      rEmail.value=bm.email;
+      rName.style.background='#e8f0f8';
+      rEmail.style.background='#e8f0f8';
+    } else {
+      rName.value='';rEmail.value='';
+      rName.style.background='';rEmail.style.background='';
+    }
+  }
+}
+
+function changeCompany(){
+  if(!confirm('ต้องการเปลี่ยนบริษัทใช่ไหม?'))return;
+  document.getElementById('companyScreen').style.display='flex';
+  document.getElementById('formWrapper').style.display='none';
+  selectedCompany='';
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('reportDate').value=today;
+  document.getElementById('preparedDate').value=today;
+  const saved=sessionStorage.getItem('selectedCompany');
+  if(saved)selectCompany(saved);
+  loadDraft();
+  document.querySelectorAll('input,textarea,select').forEach(el=>{
+    el.addEventListener('change',updateProgress);
+    el.addEventListener('input',updateProgress);
+  });
+  document.getElementById('mainForm').addEventListener('submit',handleSubmit);
+  updateProgress();
+
+  // ── Auto-fill ส่วนที่ 8 จากส่วนที่ 1 ──
+  const rName=document.querySelector('[name="reporterName"]');
+  const rPos =document.querySelector('[name="reporterPosition"]');
+  const pName=document.querySelector('[name="preparedByName"]');
+  const pPos =document.querySelector('[name="preparedByPosition"]');
+  function syncSection8(){
+    if(!pName.dataset.manual) pName.value=rName.value;
+    if(!pPos.dataset.manual)  pPos.value=rPos.value;
+  }
+  if(rName&&rPos&&pName&&pPos){
+    rName.addEventListener('input',syncSection8);
+    rPos.addEventListener('input',syncSection8);
+    // ถ้าผู้ใช้แก้ส่วนที่ 8 เองให้หยุด auto-fill
+    pName.addEventListener('input',function(){this.dataset.manual='1';});
+    pPos.addEventListener('input',function(){this.dataset.manual='1';});
+  }
+});
+
+function toggleCheck(el){
+  const cb=el.querySelector('input[type="checkbox"]');
+  if(!cb||event.target===cb)return;
+  cb.checked=!cb.checked;
+  cb.dispatchEvent(new Event('change',{bubbles:true}));
+  el.classList.toggle('checked',cb.checked);
+  if(cb.value==='Other'){
+    const box=document.getElementById('otherCategoryInput');
+    if(box) box.style.display=cb.checked?'block':'none';
+    if(!cb.checked){const inp=box&&box.querySelector('input');if(inp)inp.value='';}
+  }
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  const otherCb=document.getElementById('otherCategoryCheck');
+  if(otherCb){
+    otherCb.addEventListener('change',function(){
+      const box=document.getElementById('otherCategoryInput');
+      if(box) box.style.display=this.checked?'block':'none';
+      if(!this.checked){const inp=box&&box.querySelector('input');if(inp)inp.value='';}
+    });
+  }
+});
+
+function toggleSeverity(el){
+  const rb=el.querySelector('input[type="radio"]');
+  if(!rb||event.target===rb)return;
+  rb.checked=true;
+  rb.dispatchEvent(new Event('change',{bubbles:true}));
+  document.querySelectorAll('.severity-item').forEach(s=>s.classList.remove('checked'));
+  el.classList.add('checked');
+}
+
+document.querySelectorAll('.check-item input[type="checkbox"]').forEach(cb=>{
+  cb.addEventListener('change',function(){this.closest('.check-item').classList.toggle('checked',this.checked);});
+});
+
+document.querySelectorAll('.severity-item input[type="radio"]').forEach(rb=>{
+  rb.addEventListener('change',function(){
+    document.querySelectorAll('.severity-item').forEach(s=>s.classList.remove('checked'));
+    this.closest('.severity-item').classList.add('checked');
+  });
+});
+
+function addActionRow(){
+  actionRowCount++;
+  const tbody=document.getElementById('actionBody');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td class="row-num">${actionRowCount}</td><td><textarea name="actionItem[]" rows="2" placeholder="ระบุสิ่งที่ต้องทำ..."></textarea></td><td><input type="text" name="actionPIC[]" placeholder="ชื่อผู้รับผิดชอบ"></td><td><input type="date" name="actionDate[]"></td><td><button type="button" class="btn-del-row" onclick="delRow(this)">🗑</button></td>`;
+  tbody.appendChild(tr);renumberRows();
+}
+
+function delRow(btn){
+  if(document.querySelectorAll('#actionBody tr').length<=1)return;
+  btn.closest('tr').remove();renumberRows();
+}
+
+function renumberRows(){
+  document.querySelectorAll('#actionBody tr').forEach((tr,i)=>{tr.querySelector('.row-num').textContent=i+1;});
+}
+
+function updateProgress(){
+  const req=document.querySelectorAll('[required]');
+  let filled=0;
+  req.forEach(el=>{if(el.value&&el.value.trim())filled++;});
+  document.getElementById('progressFill').style.width=(req.length?Math.round(filled/req.length*100):0)+'%';
+}
+
+function openUploadWidget(){
+  try{
+    if(typeof cloudinary==='undefined'){
+      showToast('⚠️ ไม่สามารถโหลด Cloudinary ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต','error');
+      return;
+    }
+    // สร้างใหม่ทุกครั้ง เพื่อให้แน่ใจว่าไม่ค้างจาก session ก่อนหน้า
+    cloudinaryWidget=cloudinary.createUploadWidget(
+      {cloudName:CLOUDINARY_CLOUD_NAME,uploadPreset:CLOUDINARY_UPLOAD_PRESET,
+       sources:['local','camera'],multiple:true,maxFiles:15,maxFileSize:10000000,
+       clientAllowedFormats:['jpg','jpeg','png','heic','webp'],
+       language:'th',showAdvancedOptions:false,cropping:false,
+       styles:{palette:{window:'#FFFFFF',windowBorder:'#1a3a5c',tabIcon:'#1a3a5c',
+         menuIcons:'#5A616A',textDark:'#000000',textLight:'#FFFFFF',link:'#1a3a5c',
+         action:'#e63946',inactiveTabIcon:'#6c757d',error:'#F44235',inProgress:'#0078FF',
+         complete:'#20B832',sourceBg:'#E4EBF1'}}},
+      (error,result)=>{
+        if(error){showToast('❌ อัปโหลดไม่สำเร็จ: '+error.message,'error');return;}
+        if(result&&result.event==='success'){
+          const url=result.info.secure_url;
+          uploadedPhotos.push(url);
+          addPhotoThumb(url);
+          document.getElementById('photoUrls').value=uploadedPhotos.join(',');
+          showToast('✅ อัปโหลดรูปภาพสำเร็จ','success');
+        }
+      }
+    );
+    cloudinaryWidget.open();
+  }catch(err){
+    showToast('❌ เกิดข้อผิดพลาด: '+err.message,'error');
+  }
+}
+
+function addPhotoThumb(url){
+  const grid=document.getElementById('photoGrid');
+  const idx=uploadedPhotos.length-1;
+  const div=document.createElement('div');
+  div.className='photo-thumb';
+  div.innerHTML=`<img src="${url}" alt="รูป ${idx+1}" loading="lazy"><button class="remove-btn" onclick="removePhoto(${idx},this)">✕</button>`;
+  grid.appendChild(div);
+}
+
+function removePhoto(idx,btn){
+  uploadedPhotos.splice(idx,1);
+  btn.closest('.photo-thumb').remove();
+  document.getElementById('photoUrls').value=uploadedPhotos.join(',');
+}
+
+function collectFormData(){
+  const form=document.getElementById('mainForm');
+  const data={};
+  new FormData(form).forEach((value,key)=>{
+    if(data[key]){data[key]=Array.isArray(data[key])?[...data[key],value]:[data[key],value];}
+    else{data[key]=value;}
+  });
+  Object.keys(data).forEach(key=>{if(Array.isArray(data[key]))data[key]=data[key].join(' | ');});
+  if(data.project==='__other__')data.project=data.projectOther||'อื่นๆ';
+  delete data.projectOther;
+  data.photoUrls=uploadedPhotos.join(', ');
+  data.company=selectedCompany;
+  data.submittedAt=new Date().toISOString();
+  return data;
+}
+
+function saveDraft(){
+  const data=collectFormData();data.status='draft';
+  localStorage.setItem('incidentDraft_v2',JSON.stringify(data));
+  showToast('💾 บันทึกแบบร่างแล้ว','success');
+}
+
+function loadDraft(){
+  try{
+    const draft=JSON.parse(localStorage.getItem('incidentDraft_v2'));
+    if(!draft)return;
+    const form=document.getElementById('mainForm');
+    Object.entries(draft).forEach(([key,value])=>{
+      form.querySelectorAll(`[name="${key}"]`).forEach(el=>{
+        if(el.type==='checkbox'){el.checked=String(value).includes(el.value);el.closest('.check-item')?.classList.toggle('checked',el.checked);}
+        else if(el.type==='radio'){el.checked=el.value===value;if(el.checked)el.closest('.severity-item')?.classList.add('checked');}
+        else if(el.tagName!=='BUTTON'&&!el.readOnly){el.value=value;}
+      });
+    });
+    if(draft.photoUrls){uploadedPhotos=draft.photoUrls.split(', ').filter(Boolean);uploadedPhotos.forEach(url=>addPhotoThumb(url));}
+    showToast('📂 โหลดแบบร่างที่บันทึกไว้แล้ว','');
+  }catch(e){}
+}
+
+async function handleSubmit(e){
+  e.preventDefault();
+  const form=document.getElementById('mainForm');
+  if(!form.checkValidity()){form.reportValidity();showToast('⚠️ กรุณากรอกข้อมูลที่จำเป็นให้ครบ','error');return;}
+  const btn=form.querySelector('.btn-submit');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span> กำลังส่ง...';
+  const data=collectFormData();data.status='pending_review';
+  try{
+    await fetch(GOOGLE_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)});
+    localStorage.removeItem('incidentDraft_v2');
+    document.getElementById('statusBadge').textContent='● รอการตรวจสอบ';
+    document.getElementById('statusBadge').className='status-badge status-sent';
+    showToast('✅ ส่งรายงานเรียบร้อย ระบบส่ง Email แจ้งผู้ตรวจสอบแล้ว','success');
+    btn.innerHTML='✅ ส่งแล้ว';
+    setTimeout(()=>{btn.disabled=false;btn.innerHTML='<span>📤</span> ส่งรายงาน';},3000);
+  }catch(err){
+    showToast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่','error');
+    btn.disabled=false;btn.innerHTML='<span>📤</span> ส่งรายงาน';
+  }
+}
+
+function showToast(message,type=''){
+  const container=document.getElementById('toastContainer');
+  const toast=document.createElement('div');
+  toast.className=`toast-msg ${type}`;toast.textContent=message;
+  container.appendChild(toast);setTimeout(()=>toast.remove(),4000);
+}
+</script>
+</body>
+</html>
