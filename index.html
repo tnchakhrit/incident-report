@@ -178,6 +178,16 @@
 <div class="container py-4">
 <form id="mainForm" novalidate>
 
+  <!-- หัวเรื่อง -->
+  <div class="section-card">
+    <div class="section-body">
+      <label class="form-label" style="font-size:15px;font-weight:700;color:var(--primary)">หัวเรื่อง (Subject) <span class="required-star">*</span></label>
+      <input type="text" class="form-control" name="subject" required
+        placeholder="เช่น ลิฟต์โดยสารค้างชั้น 12 / น้ำรั่วซึมจากห้อง 8A / ไฟฟ้าดับโซน B"
+        style="font-size:15px;font-weight:600">
+    </div>
+  </div>
+
   <!-- ส่วนที่ 1 -->
   <div class="section-card">
     <div class="section-header blue">
@@ -297,6 +307,14 @@
           <input type="checkbox" name="incidentCategory" value="Water Damage / Leak">
           <label><strong>Water Damage / Leak</strong><small>น้ำท่วม / น้ำรั่วซึมภายในอาคาร</small></label>
         </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Drugs">
+          <label><strong>Drugs : ยาเสพติด</strong><small>พบการครอบครอง ค้าขาย หรือใช้ยาเสพติดภายในพื้นที่โครงการ</small></label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" name="incidentCategory" value="Property Loss / Damage">
+          <label><strong>ทรัพย์สินเสียหาย หรือทรัพย์สินสูญหาย</strong><small>ทรัพย์สินส่วนตัวหรือส่วนกลางเสียหาย / สูญหาย / ถูกขโมย</small></label>
+        </div>
         <div class="check-item" onclick="toggleCheck(this)" id="otherCategoryItem">
           <input type="checkbox" name="incidentCategory" value="Other" id="otherCategoryCheck">
           <label><strong>อื่นๆ (Other)</strong><small>ระบุประเภทเหตุการณ์เพิ่มเติม</small></label>
@@ -385,26 +403,60 @@
       <div class="section-icon purple">🔍</div>
       <div>
         <p class="section-title">ส่วนที่ 5 — การวิเคราะห์สาเหตุที่แท้จริง (Root Cause Analysis)</p>
-        <p class="section-subtitle">วิเคราะห์ตามหลัก 4M — ระบุเฉพาะส่วนที่เกี่ยวข้อง</p>
+        <p class="section-subtitle">วิเคราะห์ตามหลัก 4M &amp; 1E — ระบุเฉพาะส่วนที่เกี่ยวข้อง พร้อมกรอกข้อมูล</p>
       </div>
     </div>
     <div class="section-body">
       <div class="rca-grid mb-4">
-        <div class="rca-card">
-          <div class="rca-label"><span class="rca-tag">M1</span> Man — คน / บุคลากร</div>
-          <textarea name="rcaMan" placeholder="เช่น ขาดความรู้ความชำนาญ, ประมาทเลินเล่อ, ฝ่าฝืนกฎระเบียบ, เหนื่อยล้า, ไม่สวม PPE"></textarea>
+        <div class="rca-card" id="rcaManCard" style="opacity:0.5;pointer-events:none">
+          <div class="rca-label" style="justify-content:space-between">
+            <span><span class="rca-tag">M1</span> Man — คน / บุคลากร</span>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;pointer-events:all">
+              <input type="checkbox" onchange="toggleRcaCard('rcaManCard','rcaMan',this)" style="accent-color:var(--primary);width:14px;height:14px">
+              เกี่ยวข้อง
+            </label>
+          </div>
+          <textarea name="rcaMan" id="rcaMan" disabled placeholder="เช่น ขาดความรู้ความชำนาญ, ประมาทเลินเล่อ, ฝ่าฝืนกฎระเบียบ, เหนื่อยล้า, ไม่สวม PPE"></textarea>
         </div>
-        <div class="rca-card">
-          <div class="rca-label"><span class="rca-tag">M2</span> Machine — เครื่องจักร / อุปกรณ์</div>
-          <textarea name="rcaMachine" placeholder="เช่น อุปกรณ์ชำรุด, เสื่อมสภาพตามอายุ, ไม่ได้รับการบำรุงรักษา PM, เครื่องมือไม่เหมาะสมกับงาน"></textarea>
+        <div class="rca-card" id="rcaMachineCard" style="opacity:0.5;pointer-events:none">
+          <div class="rca-label" style="justify-content:space-between">
+            <span><span class="rca-tag">M2</span> Machine — เครื่องจักร / อุปกรณ์</span>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;pointer-events:all">
+              <input type="checkbox" onchange="toggleRcaCard('rcaMachineCard','rcaMachine',this)" style="accent-color:var(--primary);width:14px;height:14px">
+              เกี่ยวข้อง
+            </label>
+          </div>
+          <textarea name="rcaMachine" id="rcaMachine" disabled placeholder="เช่น อุปกรณ์ชำรุด, เสื่อมสภาพตามอายุ, ไม่ได้รับการบำรุงรักษา PM, เครื่องมือไม่เหมาะสมกับงาน"></textarea>
         </div>
-        <div class="rca-card">
-          <div class="rca-label"><span class="rca-tag">M3</span> Method — ขั้นตอน / วิธีการทำงาน</div>
-          <textarea name="rcaMethod" placeholder="เช่น ไม่มีคู่มือ SOP, ขั้นตอนไม่รัดกุม, ขาดการสื่อสารระหว่างทีม, ไม่มี Work Permit"></textarea>
+        <div class="rca-card" id="rcaMethodCard" style="opacity:0.5;pointer-events:none">
+          <div class="rca-label" style="justify-content:space-between">
+            <span><span class="rca-tag">M3</span> Method — ขั้นตอน / วิธีการทำงาน</span>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;pointer-events:all">
+              <input type="checkbox" onchange="toggleRcaCard('rcaMethodCard','rcaMethod',this)" style="accent-color:var(--primary);width:14px;height:14px">
+              เกี่ยวข้อง
+            </label>
+          </div>
+          <textarea name="rcaMethod" id="rcaMethod" disabled placeholder="เช่น ไม่มีคู่มือ SOP, ขั้นตอนไม่รัดกุม, ขาดการสื่อสารระหว่างทีม, ไม่มี Work Permit"></textarea>
         </div>
-        <div class="rca-card">
-          <div class="rca-label"><span class="rca-tag">M4</span> Material — วัสดุ / สภาพแวดล้อม</div>
-          <textarea name="rcaMaterial" placeholder="เช่น พื้นเปียกลื่น, แสงสว่างไม่เพียงพอ, อากาศถ่ายเทไม่ดี, วัสดุชำรุดหรือไม่ได้มาตรฐาน"></textarea>
+        <div class="rca-card" id="rcaMaterialCard" style="opacity:0.5;pointer-events:none">
+          <div class="rca-label" style="justify-content:space-between">
+            <span><span class="rca-tag">M4</span> Material — วัสดุ / สภาพแวดล้อม</span>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;pointer-events:all">
+              <input type="checkbox" onchange="toggleRcaCard('rcaMaterialCard','rcaMaterial',this)" style="accent-color:var(--primary);width:14px;height:14px">
+              เกี่ยวข้อง
+            </label>
+          </div>
+          <textarea name="rcaMaterial" id="rcaMaterial" disabled placeholder="เช่น พื้นเปียกลื่น, แสงสว่างไม่เพียงพอ, อากาศถ่ายเทไม่ดี, วัสดุชำรุดหรือไม่ได้มาตรฐาน"></textarea>
+        </div>
+        <div class="rca-card" id="rcaEnvironmentCard" style="opacity:0.5;pointer-events:none">
+          <div class="rca-label" style="justify-content:space-between">
+            <span><span class="rca-tag" style="background:#2d6a4f">E</span> Environment — สิ่งแวดล้อม</span>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#2d6a4f;cursor:pointer;pointer-events:all">
+              <input type="checkbox" id="rcaEnvironmentCheck" onchange="toggleRcaEnvironment(this)" style="accent-color:#2d6a4f;width:14px;height:14px">
+              เกี่ยวข้อง
+            </label>
+          </div>
+          <textarea name="rcaEnvironment" id="rcaEnvironmentText" placeholder="เช่น สภาพอากาศ ฝนตกหนัก, น้ำท่วมขัง, อุณหภูมิสูง/ต่ำผิดปกติ, มลพิษทางเสียงหรืออากาศ" disabled></textarea>
         </div>
       </div>
       <label class="form-label">สรุปสาเหตุหลักที่ทำให้เกิดเหตุ (Primary Root Cause) <span class="required-star">*</span></label>
@@ -466,21 +518,37 @@
             <input type="radio" name="severityLevel" value="ต่ำ (Low)" required>
             <div class="sev-icon">🟢</div>
             <label>ต่ำ<br><small style="font-weight:400;font-size:11px">Low</small></label>
+            <div style="font-size:11px;color:#374151;text-align:left;margin-top:4px;line-height:1.4">
+              <div><strong>ผลกระทบ:</strong> เล็กน้อย ไม่กระทบการพักอาศัยโดยรวม</div>
+              <div style="margin-top:2px"><strong>การจัดการ:</strong> ทีมช่างอาคารแก้ไขจบได้ไว ภายใน 15-30 นาที</div>
+            </div>
           </div>
           <div class="severity-item medium" onclick="toggleSeverity(this)">
             <input type="radio" name="severityLevel" value="ปานกลาง (Medium)">
             <div class="sev-icon">🟡</div>
             <label>ปานกลาง<br><small style="font-weight:400;font-size:11px">Medium</small></label>
+            <div style="font-size:11px;color:#374151;text-align:left;margin-top:4px;line-height:1.4">
+              <div><strong>ผลกระทบ:</strong> มีความเสียหายบางส่วน แต่ยังอยู่ในวงจำกัด</div>
+              <div style="margin-top:2px"><strong>การจัดการ:</strong> ทีมช่างอาคารจัดการจบได้เอง ใช้เวลาแก้ไข 1-2 ชั่วโมง</div>
+            </div>
           </div>
           <div class="severity-item high" onclick="toggleSeverity(this)">
             <input type="radio" name="severityLevel" value="สูง (High)">
             <div class="sev-icon">🟠</div>
             <label>สูง<br><small style="font-weight:400;font-size:11px">High</small></label>
+            <div style="font-size:11px;color:#374151;text-align:left;margin-top:4px;line-height:1.4">
+              <div><strong>ผลกระทบ:</strong> กระทบการอยู่อาศัยทันที มีผู้บาดเจ็บ หรือมีความสูญเสียทางทรัพย์สิน</div>
+              <div style="margin-top:2px"><strong>การจัดการ:</strong> เกินกำลังทีมช่างอาคาร ต้องขอกำลังเสริมจากส่วนกลาง ผู้รับเหมาเฉพาะทาง หรือประสานหน่วยงานภายนอก</div>
+            </div>
           </div>
           <div class="severity-item critical" onclick="toggleSeverity(this)">
             <input type="radio" name="severityLevel" value="วิกฤต (Critical)">
             <div class="sev-icon">🔴</div>
             <label>วิกฤต<br><small style="font-weight:400;font-size:11px">Critical</small></label>
+            <div style="font-size:11px;color:#374151;text-align:left;margin-top:4px;line-height:1.4">
+              <div><strong>ผลกระทบ:</strong> อันตรายร้ายแรง เสี่ยงต่อชีวิตและทรัพย์สินของคนหมู่มาก มีโอกาสบานปลายกลายเป็นข่าวหรือกระแสด้านลบทาง Social Media</div>
+              <div style="margin-top:2px"><strong>การจัดการ:</strong> ต้องใช้แผนฉุกเฉินระดับองค์กร แจ้งผู้บริหารระดับสูงทันที และต้องพึ่งพาหน่วยงานกู้ภัยฉุกเฉินระดับพื้นที่</div>
+            </div>
           </div>
         </div>
       </div>
@@ -765,6 +833,36 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
 });
+
+function toggleRcaCard(cardId,textId,cb){
+  const card=document.getElementById(cardId);
+  const txt=document.getElementById(textId);
+  if(cb.checked){
+    card.style.opacity='1';
+    card.style.pointerEvents='auto';
+    txt.disabled=false;
+  } else {
+    card.style.opacity='0.5';
+    card.style.pointerEvents='none';
+    txt.disabled=true;
+    txt.value='';
+  }
+}
+
+function toggleRcaEnvironment(cb){
+  const card=document.getElementById('rcaEnvironmentCard');
+  const txt=document.getElementById('rcaEnvironmentText');
+  if(cb.checked){
+    card.style.opacity='1';
+    card.style.pointerEvents='auto';
+    txt.disabled=false;
+  } else {
+    card.style.opacity='0.5';
+    card.style.pointerEvents='none';
+    txt.disabled=true;
+    txt.value='';
+  }
+}
 
 function toggleSeverity(el){
   const rb=el.querySelector('input[type="radio"]');
