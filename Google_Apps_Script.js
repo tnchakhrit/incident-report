@@ -18,9 +18,9 @@
 
 // ─── CONFIG ───────────────────────────────────────────────
 const CONFIG = {
-  SHEET_ID: 'YOUR_GOOGLE_SHEET_ID',          // ← แก้ตรงนี้
+  SHEET_ID: '1BlPrmdt4pYq0coB6PRRAh85lm6zm_2xA42UBLv3lZh4',
   DATA_SHEET_NAME: 'Incident Reports',        // ชื่อ Tab เก็บข้อมูล
-  REVIEWER_EMAIL: 'qshe@your-company.com',    // ← แก้ตรงนี้ (chakhrit.th@primo.co.th)
+  REVIEWER_EMAIL: 'tn.chakhrit@gmail.com',    // ← แก้ตรงนี้ (chakhrit.th@primo.co.th)
   REPORT_PREFIX: 'INC',                       // prefix เลขที่รายงาน
 
   // ─── Google Form สำหรับ Review/Approve ───
@@ -72,7 +72,7 @@ function buildFormUrl(reportNo, role) {
 
 /**
  * ฟังก์ชันนี้ต้องผูก Trigger: Extensions → Apps Script → Triggers
- * → Add Trigger → onFormSubmit → From form → On form submit
+ * → Add Trigger → onFormSubmit → From spreadsheet → On form submit
  *
  * เมื่อ Reviewer/Approver กด Submit Form → อัปเดต Sheet + ส่งอีเมลแจ้ง QSHE
  */
@@ -96,15 +96,16 @@ function onFormSubmit(e) {
     for (let i = 1; i < data.length; i++) {
       if (String(data[i][0]).trim() !== reportNo) continue;
 
-      const statusCol = 28; // column "สถานะ" (1-based)
+      const statusCol = 29; // column "สถานะ" (1-based) ✅ แก้แล้ว
 
       // แปลผลเป็นสถานะภาษาไทย
+      // ✅ เช็ค 'ไม่ผ่าน' ก่อน เพราะ 'ไม่ผ่าน'.includes('ผ่าน') === true
       let newStatus;
       const isReviewer = role.includes('Review') || role.includes('ตรวจสอบ');
-      if (result.includes('ผ่าน')) {
-        newStatus = isReviewer ? 'ตรวจสอบแล้ว ✅' : 'อนุมัติแล้ว ✅';
-      } else if (result.includes('ไม่ผ่าน')) {
+      if (result.includes('ไม่ผ่าน')) {
         newStatus = isReviewer ? 'ส่งกลับแก้ไข ❌' : 'ไม่อนุมัติ ❌';
+      } else if (result.includes('ผ่าน')) {
+        newStatus = isReviewer ? 'ตรวจสอบแล้ว ✅' : 'อนุมัติแล้ว ✅';
       } else {
         newStatus = 'รอข้อมูลเพิ่มเติม ⏸️';
       }
@@ -140,7 +141,9 @@ function sendUpdateNotification(reportNo, role, result, comment, submitter, rowD
   const project = rowData[3] || '';
   const subject = `[อัปเดต] ${reportNo} — ${role}: ${result}`;
 
-  const resultColor = result.includes('ผ่าน') ? '#2d6a4f' : result.includes('ไม่ผ่าน') ? '#d62828' : '#e76f00';
+  // ✅ เช็ค 'ไม่ผ่าน' ก่อน เพื่อให้สีถูกต้อง
+  const resultColor = result.includes('ไม่ผ่าน') ? '#d62828' : result.includes('ผ่าน') ? '#2d6a4f' : '#e76f00';
+
   const body = `
 <!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
 <style>
@@ -179,9 +182,9 @@ function sendUpdateNotification(reportNo, role, result, comment, submitter, rowD
  * ส่งอีเมลแจ้งผู้รายงานเมื่อถูก Reject
  */
 function sendRejectionEmail(reportNo, reviewerRole, comment, toEmail, rowData) {
-  const project  = rowData[3] || '';
-  const formUrl  = `https://docs.google.com/forms/d/e/${CONFIG.FORM_ID.replace('YOUR_GOOGLE_FORM_ID','')}/viewform`;
-  const subject  = `[ต้องแก้ไข] รายงานอุบัติการณ์ ${reportNo} — ส่งกลับจาก ${reviewerRole}`;
+  const project = rowData[3] || '';
+  // ✅ ลบ formUrl dead variable ออกแล้ว
+  const subject = `[ต้องแก้ไข] รายงานอุบัติการณ์ ${reportNo} — ส่งกลับจาก ${reviewerRole}`;
 
   const body = `
 <!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
@@ -371,32 +374,32 @@ function appendRow(sheet, reportNo, d) {
     reportNo,
     Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm'),
     d.company            || '',
-    d.project            || '',          // HTML: name="project"
+    d.project            || '',
     d.incidentDate       || '',
     d.incidentTime       || '',
-    d.specificLocation   || '',          // HTML: name="specificLocation"
-    d.incidentCategory   || '',          // joined ' | ' by form
+    d.specificLocation   || '',
+    d.incidentCategory   || '',
     d.incidentCategoryOther || '',
     d.severityLevel      || '',
-    d.chronology         || '',          // HTML: name="chronology"
-    d.primaryRootCause   || '',          // HTML: name="primaryRootCause"
+    d.chronology         || '',
+    d.primaryRootCause   || '',
     immediateAction,
-    d.rcaMan             || '',          // HTML: name="rcaMan"
-    d.rcaMachine         || '',          // HTML: name="rcaMachine"
-    d.rcaMethod          || '',          // HTML: name="rcaMethod"
-    d.rcaMaterial        || '',          // HTML: name="rcaMaterial"
+    d.rcaMan             || '',
+    d.rcaMachine         || '',
+    d.rcaMethod          || '',
+    d.rcaMaterial        || '',
     actionItems,
-    d.involvedPersons    || '',          // HTML: name="involvedPersons"
-    d.damageExtent       || '',          // HTML: name="damageExtent"
+    d.involvedPersons    || '',
+    d.damageExtent       || '',
     [d.estimatedCost ? 'ค่าเสียหายโดยประมาณ: ' + d.estimatedCost + ' บาท' : '',
      d.operationImpact || ''].filter(Boolean).join('\n'),
     d.preparedByName     || '',
     d.preparedByPosition || '',
-    d.preparedDate       || '',          // HTML: name="preparedDate"
-    d.reviewedByName     || '',          // HTML: name="reviewedByName"
-    d.reviewedByEmail    || '',          // HTML: name="reviewedByEmail"
-    d.approvedByName     || '',          // HTML: name="approvedByName"
-    d.approvedByEmail    || '',          // HTML: name="approvedByEmail"
+    d.preparedDate       || '',
+    d.reviewedByName     || '',
+    d.reviewedByEmail    || '',
+    d.approvedByName     || '',
+    d.approvedByEmail    || '',
     'รอตรวจสอบ',
     d.photoUrls          || '',
   ];
@@ -473,17 +476,14 @@ function sendToApprover(subject, reportNo, d) {
 /**
  * ส่ง 1 ฉบับรวม (FYI) ให้ CC List
  * กรองอีเมลออกถ้าคนนั้นเป็น Reviewer หรือ Approver ของ case นี้
- * (เพราะเขาได้รับอีเมลของตัวเองอยู่แล้ว)
  */
 function sendToCCList(subject, reportNo, d) {
-  // รายชื่อที่ได้รับอีเมลโดยตรงอยู่แล้ว
   const directRecipients = [
     (CONFIG.REVIEWER_EMAIL || '').toLowerCase(),
     (d.reviewedByEmail   || '').toLowerCase(),
     (d.approvedByEmail   || '').toLowerCase(),
   ].filter(Boolean);
 
-  // กรอง CC List ออก
   const filteredCC = CC_EMAILS_LIST.filter(
     email => !directRecipients.includes(email.toLowerCase())
   );
