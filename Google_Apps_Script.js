@@ -323,11 +323,23 @@ function renderFullReport(reportNo) {
     ).setTitle('ไม่พบรายงาน');
   }
 
+  // คอลัมน์ที่มาจาก <input type="date"> (ไม่มีเวลา) — ต้อง format แบบวันที่ล้วน
+  const DATE_ONLY_COLS = new Set(['วันที่เกิดเหตุ', 'ผู้จัดทำ - วันที่']);
+  // คอลัมน์ที่มาจาก <input type="time"> — Sheets แปลงเป็น Date ที่วันที่เป็นค่า epoch ใช้ได้แค่ส่วนเวลา
+  const TIME_ONLY_COLS = new Set(['เวลาเกิดเหตุ']);
+
   const rec = {};
   headers.forEach((h, i) => {
     const v = row[i];
-    // Sheets จะแปลงค่าที่หน้าตาเหมือนวันที่ (เช่นจาก input type=date/time) เป็น Date object เอง
-    rec[h] = (v instanceof Date) ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm') : v;
+    // Sheets จะแปลงค่าที่หน้าตาเหมือนวันที่/เวลา (เช่นจาก input type=date/time) เป็น Date object เอง
+    if (v instanceof Date) {
+      const tz = Session.getScriptTimeZone();
+      if (TIME_ONLY_COLS.has(h)) rec[h] = Utilities.formatDate(v, tz, 'HH:mm');
+      else if (DATE_ONLY_COLS.has(h)) rec[h] = Utilities.formatDate(v, tz, 'dd/MM/yyyy');
+      else rec[h] = Utilities.formatDate(v, tz, 'dd/MM/yyyy HH:mm');
+    } else {
+      rec[h] = v;
+    }
   });
 
   const section = (title, rows) => `
