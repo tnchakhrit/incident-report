@@ -213,7 +213,7 @@ function sendRejectionEmail(reportNo, reviewerRole, comment, toEmail, rowData) {
     </table>
     ${comment ? `<div class="reason-box"><strong>เหตุผล / สิ่งที่ต้องแก้ไข:</strong><br>${comment}</div>` : ''}
     <p>กรุณากรอกรายงานใหม่พร้อมแก้ไขข้อมูลที่ระบุ แล้วส่งอีกครั้ง</p>
-    <a href="https://test-incident-report-28.netlify.app" class="btn">กรอกรายงานใหม่</a>
+    <a href="https://pri-incident-report-form.netlify.app" class="btn">กรอกรายงานใหม่</a>
   </div>
   <div class="footer">ระบบ Incident Report — Design by Chakhrit</div>
 </div></body></html>`;
