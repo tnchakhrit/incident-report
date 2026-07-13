@@ -742,7 +742,7 @@ function buildEmailBody(reportNo, d, role) {
 
     <div style="text-align:center;margin:24px 0 4px">
       <a href="${buildFullReportUrl(reportNo)}" style="display:inline-block;background:#fff;color:#1a3a5c;text-decoration:none;padding:11px 28px;border-radius:8px;font-size:14px;font-weight:700;border:2px solid #1a3a5c">
-        📄 ดูรายงานฉบับเต็ม
+        ดูรายงานฉบับเต็ม
       </a>
     </div>
 
