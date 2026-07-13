@@ -255,12 +255,157 @@ function doPost(e) {
 }
 
 /**
- * รองรับ GET request (ทดสอบว่า Script ทำงานอยู่)
+ * GET request:
+ *  - ?reportNo=INC-2026-07-001  → หน้ารายงานฉบับเต็ม (public, ไม่ต้อง login)
+ *  - ไม่มี query                → ping ทดสอบว่า Script ทำงานอยู่
  */
-function doGet() {
+function doGet(e) {
+  const reportNo = e && e.parameter && e.parameter.reportNo;
+  if (reportNo) {
+    return renderFullReport(reportNo.trim());
+  }
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'Incident Report API is running.' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * สร้าง URL ไปหน้ารายงานฉบับเต็มของ Web App ที่ deploy อยู่
+ */
+function buildFullReportUrl(reportNo) {
+  return `${ScriptApp.getService().getUrl()}?reportNo=${encodeURIComponent(reportNo)}`;
+}
+
+/**
+ * escape ข้อความก่อนแทรกลง HTML — จำเป็นเพราะหน้านี้เป็นหน้าเว็บ public
+ * ที่ render ข้อมูลซึ่งผู้ใช้กรอกเองมาโดยตรง (กัน stored XSS)
+ */
+function escapeHtml_(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * แปลง photoUrls string ("url1, url2, ...") → grid รูป thumbnail คลิกขยายได้
+ * กรองเฉพาะ http/https กัน javascript: URI แอบมาแทรกใน href/src
+ */
+function renderPhotoGrid_(photoUrlsStr) {
+  const urls = String(photoUrlsStr || '').split(',')
+    .map(u => u.trim())
+    .filter(u => /^https?:\/\//i.test(u));
+  if (!urls.length) return '<p style="color:#aaa;font-size:13px">— ไม่มีรูปภาพประกอบ —</p>';
+  return `<div style="display:flex;flex-wrap:wrap;gap:10px">${urls.map((url, i) => `
+    <a href="${escapeHtml_(url)}" target="_blank" rel="noopener" style="display:block">
+      <img src="${escapeHtml_(url)}" alt="รูปที่ ${i + 1}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd">
+    </a>`).join('')}</div>`;
+}
+
+/**
+ * หาแถวข้อมูลจาก reportNo แล้ว render เป็นหน้ารายงานฉบับเต็ม (ทุกหัวข้อ)
+ */
+function renderFullReport(reportNo) {
+  const sheet = getOrCreateSheet();
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+
+  let row = null;
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][0]).trim() === reportNo) { row = values[i]; break; }
+  }
+
+  if (!row) {
+    return HtmlService.createHtmlOutput(
+      `<p style="font-family:sans-serif;padding:40px;text-align:center">ไม่พบรายงานเลขที่ "${escapeHtml_(reportNo)}"</p>`
+    ).setTitle('ไม่พบรายงาน');
+  }
+
+  const rec = {};
+  headers.forEach((h, i) => {
+    const v = row[i];
+    // Sheets จะแปลงค่าที่หน้าตาเหมือนวันที่ (เช่นจาก input type=date/time) เป็น Date object เอง
+    rec[h] = (v instanceof Date) ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm') : v;
+  });
+
+  const section = (title, rows) => `
+    <h3 style="color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px;margin:24px 0 4px">${title}</h3>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:14px">
+      ${rows.filter(r => r).join('')}
+    </table>`;
+  const tr = (label, value) => value
+    ? `<tr><td style="padding:9px 10px;border-bottom:1px solid #eee;vertical-align:top;font-weight:600;color:#1a3a5c;width:35%">${label}</td><td style="padding:9px 10px;border-bottom:1px solid #eee;vertical-align:top;white-space:pre-wrap">${escapeHtml_(value)}</td></tr>`
+    : '';
+
+  const html = `
+<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{font-family:'Sarabun',Arial,sans-serif;background:#f0f4f8;margin:0;padding:20px}
+  .card{max-width:760px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.1)}
+  .header{background:linear-gradient(135deg,#1a3a5c,#0d2137);color:#fff;padding:28px 32px}
+  .header h1{margin:0 0 4px;font-size:20px}
+  .header p{margin:0;opacity:0.7;font-size:13px}
+  .body{padding:28px 32px}
+  .report-no{display:inline-block;background:#e8f0f8;color:#1a3a5c;font-weight:700;font-size:18px;padding:8px 20px;border-radius:8px;margin-bottom:8px;letter-spacing:1px}
+  .status-badge{display:inline-block;background:#1a3a5c;color:#fff;font-weight:700;padding:4px 14px;border-radius:20px;font-size:13px;margin-left:8px}
+  .footer{background:#f8f9fa;padding:16px 32px;font-size:12px;color:#888;text-align:center}
+</style></head><body>
+<div class="card">
+  <div class="header">
+    <h1>เอกสารรายงานอุบัติการณ์ (ฉบับเต็ม)</h1>
+    <p>Incident &amp; Near Miss Report — Full Detail</p>
+  </div>
+  <div class="body">
+    <span class="report-no">[${escapeHtml_(reportNo)}]</span>
+    <span class="status-badge">${escapeHtml_(rec['สถานะ'])}</span>
+
+    ${section('ข้อมูลเหตุการณ์', [
+      tr('วันที่บันทึก', rec['วันที่บันทึก']),
+      tr('บริษัท', rec['บริษัท']),
+      tr('ชื่อโครงการ', rec['ชื่อโครงการ']),
+      tr('วันที่เกิดเหตุ', rec['วันที่เกิดเหตุ']),
+      tr('เวลาเกิดเหตุ', rec['เวลาเกิดเหตุ']),
+      tr('สถานที่เกิดเหตุ', rec['สถานที่เกิดเหตุ']),
+      tr('ประเภทเหตุการณ์', rec['ประเภทเหตุการณ์']),
+      tr('อื่นๆ (ระบุ)', rec['อื่นๆ (ระบุ)']),
+      tr('ระดับความรุนแรง', rec['ระดับความรุนแรง']),
+      tr('รายละเอียดเหตุการณ์', rec['รายละเอียดเหตุการณ์']),
+    ])}
+
+    ${section('สาเหตุและการดำเนินการ', [
+      tr('สาเหตุเบื้องต้น', rec['สาเหตุเบื้องต้น']),
+      tr('การดำเนินการทันที', rec['การดำเนินการทันที']),
+      tr('RCA - Man (คน)', rec['RCA - Man (คน)']),
+      tr('RCA - Machine (เครื่องจักร/อุปกรณ์)', rec['RCA - Machine (เครื่องจักร/อุปกรณ์)']),
+      tr('RCA - Method (วิธีการ/ขั้นตอน)', rec['RCA - Method (วิธีการ/ขั้นตอน)']),
+      tr('RCA - Material (วัสดุ/สารเคมี)', rec['RCA - Material (วัสดุ/สารเคมี)']),
+      tr('มาตรการป้องกัน (Action Items)', rec['มาตรการป้องกัน (Action Items)']),
+    ])}
+
+    ${(rec['ผู้บาดเจ็บ/เสียชีวิต'] || rec['ทรัพย์สินเสียหาย'] || rec['ผลกระทบด้านสิ่งแวดล้อม']) ? section('ผลกระทบ', [
+      tr('ผู้บาดเจ็บ/เสียชีวิต', rec['ผู้บาดเจ็บ/เสียชีวิต']),
+      tr('ทรัพย์สินเสียหาย', rec['ทรัพย์สินเสียหาย']),
+      tr('ค่าเสียหาย / ผลกระทบต่อการดำเนินงาน', rec['ผลกระทบด้านสิ่งแวดล้อม']),
+    ]) : ''}
+
+    ${section('ผู้เกี่ยวข้อง', [
+      tr('ผู้จัดทำ', `${rec['ผู้จัดทำ - ชื่อ'] || ''} (${rec['ผู้จัดทำ - ตำแหน่ง'] || ''}) — ${rec['ผู้จัดทำ - วันที่'] || ''}`),
+      tr('Reviewer', (rec['Reviewer - ชื่อ'] || rec['Reviewer - อีเมล']) ? `${rec['Reviewer - ชื่อ'] || ''} <${rec['Reviewer - อีเมล'] || ''}>` : ''),
+      tr('Approver', (rec['Approver - ชื่อ'] || rec['Approver - อีเมล']) ? `${rec['Approver - ชื่อ'] || ''} <${rec['Approver - อีเมล'] || ''}>` : ''),
+    ])}
+
+    <h3 style="color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px;margin:24px 0 4px">รูปภาพประกอบ</h3>
+    ${renderPhotoGrid_(rec['รูปภาพประกอบ (URLs)'])}
+  </div>
+  <div class="footer">ระบบ Incident Report — Design by Chakhrit</div>
+</div>
+</body></html>`;
+
+  return HtmlService.createHtmlOutput(html)
+    .setTitle(`รายงาน ${reportNo}`)
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
 // ─── SHEET HELPERS ────────────────────────────────────────
@@ -570,7 +715,20 @@ function buildEmailBody(reportNo, d, role) {
         ${d.siteControl ? '<strong>การควบคุมพื้นที่:</strong><br>' + d.siteControl.replace(/\n/g,'<br>') + '<br><br>' : ''}
         ${d.notification ? '<strong>การแจ้งเตือน:</strong><br>' + d.notification.replace(/\n/g,'<br>') : ''}
       </td></tr>` : ''}
+      ${(() => {
+        const actionItems = formatActionItems(d['actionItem[]'] || '', d['actionPIC[]'] || '', d['actionDate[]'] || '');
+        return actionItems ? `<tr><td style="vertical-align:top">มาตรการป้องกัน<br>(Action Items)</td><td>${actionItems.replace(/\n/g,'<br>')}</td></tr>` : '';
+      })()}
     </table>
+
+    ${(d.involvedPersons || d.damageExtent || d.estimatedCost || d.operationImpact) ? `
+    <h3 style="color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px">ผลกระทบ</h3>
+    <table>
+      ${d.involvedPersons ? `<tr><td>ผู้บาดเจ็บ/เสียชีวิต</td><td>${escapeHtml_(d.involvedPersons)}</td></tr>` : ''}
+      ${d.damageExtent ? `<tr><td>ทรัพย์สินเสียหาย</td><td>${escapeHtml_(d.damageExtent)}</td></tr>` : ''}
+      ${d.estimatedCost ? `<tr><td>ค่าเสียหายโดยประมาณ</td><td>${escapeHtml_(d.estimatedCost)} บาท</td></tr>` : ''}
+      ${d.operationImpact ? `<tr><td>ผลกระทบต่อการทำงาน/การอยู่อาศัย</td><td>${escapeHtml_(d.operationImpact)}</td></tr>` : ''}
+    </table>` : ''}
 
     <h3 style="color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px">ผู้เกี่ยวข้อง</h3>
     <table>
@@ -578,6 +736,15 @@ function buildEmailBody(reportNo, d, role) {
       <tr><td>Reviewer</td><td>${d.reviewedByName || ''} &lt;${d.reviewedByEmail || ''}&gt;</td></tr>
       <tr><td>Approver</td><td>${d.approvedByName || ''} &lt;${d.approvedByEmail || ''}&gt;</td></tr>
     </table>
+
+    <h3 style="color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px">รูปภาพประกอบ</h3>
+    ${renderPhotoGrid_(d.photoUrls)}
+
+    <div style="text-align:center;margin:24px 0 4px">
+      <a href="${buildFullReportUrl(reportNo)}" style="display:inline-block;background:#fff;color:#1a3a5c;text-decoration:none;padding:11px 28px;border-radius:8px;font-size:14px;font-weight:700;border:2px solid #1a3a5c">
+        📄 ดูรายงานฉบับเต็ม
+      </a>
+    </div>
 
     ${(role === 'reviewer' || role === 'approver') ? (() => {
       const roleLabel = role === 'reviewer' ? 'ตรวจสอบ (Review)' : 'อนุมัติ (Approve)';
